@@ -4,9 +4,13 @@ import "vite/modulepreload-polyfill";
 import "./index.css";
 
 createInertiaApp({
-  resolve: (name) => {
-    const pages = import.meta.glob("./pages/**/*.vue", { eager: true });
-    return pages[`./pages/${name}.vue`];
+  resolve: (name: string) => {
+    const pages = import.meta.glob<{ default: any }>("./pages/**/*.vue", { eager: true });
+    const page = pages[`./pages/${name}.vue`];
+    if (!page) {
+      throw new Error(`Page not found: ./${name}.vue`);
+    }
+    return page.default;
   },
   setup({ el, App, props, plugin }) {
     createApp({ render: () => h(App, props) })
